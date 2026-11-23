@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 // One-line office joke: the reply-all loop.
@@ -16,3 +16,10 @@ if (chars < 1 || chars > 199 || JOKE.trim().length === 0 || JOKE.includes("\n"))
   throw new Error(`entry length ${chars} characters is out of range`);
 }
 writeFileSync(join(outDir, "entry.txt"), JOKE, "utf8");
+
+// Read back and verify: the file on disk must be byte-identical to the
+// joke, so a partial write or encoding slip can never ship silently.
+const written = readFileSync(join(outDir, "entry.txt"), "utf8");
+if (written !== JOKE) {
+  throw new Error("entry.txt on disk does not match the joke");
+}
